@@ -1,0 +1,60 @@
+[
+  {
+    "name": "OVERLORD",
+    "author": "丸山くがね",
+    "list": [
+      {
+        "name": "OVERLORD 第1卷 不死者之王",
+        "path": "OVERLORD_01_不死者之王"
+      },
+      {
+        "name": "OVERLORD 第2卷 黑暗战士",
+        "path": "OVERLORD_02_黑暗战士"
+      },
+      {
+        "name": "OVERLORD 第3卷 鲜血的战争少女",
+        "path": "OVERLORD_03_鲜血的战争少女"
+      },
+      {
+        "name": "OVERLORD 第4卷",
+        "path": "OVERLORD_04_蜥蜴人勇者"
+      },
+      {
+        "name": "OVERLORD 第5卷",
+        "path": "OVERLORD_05_王国的男子汉们(上)"
+      },
+      {
+        "name": "OVERLORD 第6卷",
+        "path": "OVERLORD_06_王国的男子汉们(下)"
+      },
+      {
+        "name": "OVERLORD 第7卷",
+        "path": "OVERLORD_07_大坟墓的入侵者"
+      },
+      {
+        "name": "OVERLORD 第8卷",
+        "path": "OVERLORD_08_两人的先导者"
+      },
+      {
+        "name": "OVERLORD 第9卷",
+        "path": "OVERLORD_09_破军的魔法咏唱者"
+      },
+      {
+        "name": "OVERLORD 第10卷",
+        "path": "OVERLORD_10_谋略的统治者"
+      },
+      {
+        "name": "OVERLORD 第11卷",
+        "path": "OVERLORD_11_矮人的工匠"
+      },
+      {
+        "name": "OVERLORD 第12卷",
+        "path": "OVERLORD_12_圣王国的圣骑士(上)"
+      },
+      {
+        "name": "OVERLORD 第13卷",
+        "path": "OVERLORD_13_圣王国的圣骑士(下)"
+      }
+    ]
+  }
+]
