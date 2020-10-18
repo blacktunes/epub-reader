@@ -73,6 +73,7 @@ export default {
       book.ready.then(() => {
         book.loaded.metadata
           .then(data => {
+            console.log(data)
             currentChapter.value = data.title
           })
         currentChapter.value = book.loaded.metadata.title
