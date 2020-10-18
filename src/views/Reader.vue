@@ -1,7 +1,8 @@
-<script lang="jsx">
-import { ref, computed, watch, onMounted, Transition } from 'vue'
+<script>
+import { ref, provide, computed, watch, onMounted, onUnmounted, Transition } from 'vue'
 import { useRoute } from 'vue-router'
 import Epub from 'epubjs'
+import ReaderProgress from '@/components/reader/ReaderProgress'
 
 export default {
   setup () {
@@ -9,6 +10,9 @@ export default {
 
     const showMunu = ref(false)
     const bookReady = ref(false)
+    provide('bookReady', bookReady)
+    const loading = ref(false)
+    provide('loading', loading)
 
     const book = Epub(`/book/${router.query.book}/${router.query.name}.epub`)
     const rendition = book.renderTo('book', {
@@ -16,6 +20,7 @@ export default {
       width: '100%',
       height: '100%'
     })
+    provide('book', book)
     // rendition.themes.fontSize('14px')
 
     const prevPage = () => {
@@ -38,16 +43,23 @@ export default {
       rendition.reportLocation()
         .then(() => {
           location.value = rendition.currentLocation().start
-          localStorage.setItem(router.query.name, location.value.cfi)
+          setLocalStorage()
         })
     }
 
+    const setLocalStorage = () => {
+      const bookData = JSON.stringify({
+        cfi: location.value ? location.value.cfi : null,
+        time: readTime.value
+      })
+      localStorage.setItem(router.query.name, bookData)
+    }
+
     const currentChapter = ref('')
-    const readPercent = ref('-')
+    const readPercent = ref(0)
+    provide('readPercent', readPercent)
     const readTime = ref(0)
-    // setInterval(() => {
-    //   readTime.value += 1
-    // }, 1000)
+    let timer
     const readTimeStr = computed(() => {
       return Math.ceil((readTime.value + 1) / 60)
     })
@@ -55,6 +67,9 @@ export default {
     const bookRef = ref()
 
     onMounted(() => {
+      const bookLocalStorage = localStorage.getItem(router.query.name)
+      const bookData = bookLocalStorage ? JSON.parse(bookLocalStorage) : { time: 0 }
+      readTime.value = bookData.time
       book.ready.then(() => {
         book.loaded.metadata
           .then(data => {
@@ -63,9 +78,13 @@ export default {
         currentChapter.value = book.loaded.metadata.title
         book.locations.generate((bookRef.value.offsetHeight * bookRef.value.offsetWidth) / 500)
           .then(() => {
-            bookReady.value = true
-            rendition.display(localStorage.getItem(router.query.name) || undefined)
+            timer = setInterval(() => {
+              readTime.value += 1
+              setLocalStorage()
+            }, 1000)
+            rendition.display(bookData.cfi || undefined)
               .then(() => {
+                bookReady.value = true
                 watch(location, () => {
                   currentChapter.value = book.navigation.toc[location.value.index].label
                   readPercent.value = (book.locations.percentageFromCfi(location.value.cfi) * 100).toFixed(2)
@@ -76,38 +95,45 @@ export default {
       })
     })
 
+    onUnmounted(() => {
+      clearInterval(timer)
+      timer = null
+    })
+
     return () => (
       <div class="reader">
-        <div class="chapter">{currentChapter.value}</div>
-        <div class="book" id="book" style={{ opacity: bookReady.value ? 1 : 0 }} ref={bookRef}></div>
-        <Transition name="fade">
+        <div class="chapter">{ currentChapter.value }</div>
+        <div class="book" id="book" style={ { opacity: bookReady.value ? 1 : 0 } } ref={ bookRef }></div>
+        <Transition name="loading">
           {
-            !bookReady.value ? (
+            !bookReady.value || loading.value ? (
               <div class="loading">loading···</div>
             ) : null
           }
         </Transition>
         <div class="wrapper">
-          <div onClick={prevPage} class="left" />
-          <div onClick={() => { showMunu.value = true }} class="middle" />
-          <div onClick={nextPage} class="right" />
+          <div onClick={ prevPage } class="left" />
+          <div onClick={ () => { showMunu.value = true } } class="middle" />
+          <div onClick={ nextPage } class="right" />
           <Transition name="fade">
             {
               showMunu.value ? (
-                <div onClick={() => { showMunu.value = false }} class="mask"></div>
+                <div onClick={ () => { showMunu.value = false } } class="mask"></div>
               ) : null
             }
           </Transition>
           <Transition name="slide-up">
             {
               showMunu.value ? (
-                <div class="menu">menu</div>
+                <div class="menu">
+                  <ReaderProgress onProgress-change={ updateLocation } />
+                </div>
               ) : null
             }
           </Transition>
         </div>
-        <span class="read-time">已读: {readTimeStr.value}分钟</span>
-        <span class="read-percent">{readPercent.value}%</span>
+        <span class="read-time">已读: { readTimeStr.value }分钟</span>
+        <span class="read-percent">{ readPercent.value || '-' }%</span>
       </div>
     )
   }
@@ -148,14 +174,14 @@ export default {
       background rgba(255, 255, 255, 0.5)
 
     .menu
-      z-index 2
       z-index 3
       position absolute
       bottom 0
       left 0
-      height 150px
       width 100%
-      background #666
+      padding 15px
+      background #eee
+      box-sizing border-box
 
     div
       flex 0 0 33.33%
@@ -169,10 +195,19 @@ export default {
     transition opacity 0.5s
 
   .loading
+    z-index 4
     position absolute
     top 50%
     left 50%
     transform translate3d(-50%, -50%, 0)
+    color #444
+    // height 50px
+    // width 100px
+    // background #eee
+    // line-height 50px
+    // text-align center
+    // border-radius 10px
+    // border 1px solid #ddd
 
   .read-percent
     position absolute
