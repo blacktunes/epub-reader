@@ -14,7 +14,9 @@ export default {
     const loading = ref(false)
     provide('loading', loading)
 
-    const book = Epub(`/book/${router.query.book}/${router.query.name}.epub`)
+    const book = Epub(process.env.NODE_ENV === 'production'
+      ? `https://cdn.jsdelivr.net/gh/blacktunes/epub-reader@master/public/book/${router.query.book}/${router.query.name}.epub`
+      : `/book/${router.query.book}/${router.query.name}.epub`)
     const rendition = book.renderTo('book', {
       flow: 'paginated',
       width: '100%',

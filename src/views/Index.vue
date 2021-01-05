@@ -3,7 +3,7 @@
     <template v-for="item in BooksList" :key="item.name">
       <Card>
         <template v-slot:header>
-          <div class="shelf-title">{{item.name}} - {{item.author}}</div>
+          <div class="shelf-title">{{ item.name }} - {{ item.author }}</div>
         </template>
         <div class="book-list">
           <template v-for="book in item.list" :key="book.name">
@@ -12,10 +12,14 @@
                 <Card>
                   <template v-slot:header>
                     <div class="book-title">
-                      {{book.name}}
+                      {{ book.name }}
                     </div>
                   </template>
-                  <img class="img" src="../assets/image/loading.png" v-lazy="`/book/${item.name}/${book.path}.jpg`" />
+                  <img
+                    class="img"
+                    src="../assets/image/loading.png"
+                    v-lazy="getUrl(item.name, book.path)"
+                  />
                 </Card>
               </router-link>
             </div>
@@ -35,8 +39,14 @@ export default {
     Card
   },
   setup () {
+    const getUrl = (name, path) => {
+      return process.env.NODE_ENV === 'production'
+        ? `https://cdn.jsdelivr.net/gh/blacktunes/epub-reader@master/public/book/${name}/${path}.jpg`
+        : `/book/${name}/${path}.jpg`
+    }
     return {
-      BooksList
+      BooksList,
+      getUrl
     }
   }
 }
@@ -58,11 +68,14 @@ a
     display flex
     flex-wrap wrap
     justify-content space-between
+
     .book
       flex 0 0 50%
+
       .book-title
         font-size 12px
         text-align center
+
       .img
         width 100%
 </style>
