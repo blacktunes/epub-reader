@@ -1,12 +1,17 @@
 <script>
 import { ref, provide, computed, watch, onMounted, onUnmounted, Transition } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import Epub from 'epubjs'
 import ReaderProgress from '@/components/reader/ReaderProgress'
 
 export default {
-  setup () {
-    const router = useRoute()
+  setup() {
+    const route = useRoute()
+    const router = useRouter()
+    if (!route.query.c || !route.query.n) {
+      router.push('/')
+      return () => (<></>)
+    }
 
     const showMunu = ref(false)
     const bookReady = ref(false)
@@ -15,8 +20,8 @@ export default {
     provide('loading', loading)
 
     const book = Epub(process.env.NODE_ENV === 'production'
-      ? `https://cdn.jsdelivr.net/gh/blacktunes/epub-reader@master/public/book/${router.query.book}/${router.query.name}.epub`
-      : `/book/${router.query.book}/${router.query.name}.epub`)
+      ? `https://cdn.jsdelivr.net/gh/blacktunes/epub-reader@master/public/book/${route.query.c}/${route.query.n}.epub`
+      : `/book/${route.query.c}/${route.query.n}.epub`)
     const rendition = book.renderTo('book', {
       flow: 'paginated',
       width: '100%',
@@ -54,7 +59,7 @@ export default {
         cfi: location.value ? location.value.cfi : null,
         time: readTime.value
       })
-      localStorage.setItem(router.query.name, bookData)
+      localStorage.setItem(route.query.n, bookData)
     }
 
     const currentChapter = ref('')
@@ -69,13 +74,12 @@ export default {
     const bookRef = ref()
 
     onMounted(() => {
-      const bookLocalStorage = localStorage.getItem(router.query.name)
+      const bookLocalStorage = localStorage.getItem(route.query.n)
       const bookData = bookLocalStorage ? JSON.parse(bookLocalStorage) : { time: 0 }
       readTime.value = bookData.time
       book.ready.then(() => {
         book.loaded.metadata
           .then(data => {
-            console.log(data)
             currentChapter.value = data.title
           })
         currentChapter.value = book.loaded.metadata.title
@@ -89,7 +93,10 @@ export default {
               .then(() => {
                 bookReady.value = true
                 watch(location, () => {
-                  currentChapter.value = book.navigation.toc[location.value.index].label
+                  const newLocation = book.navigation.toc.find(item => {
+                    return item.href.split(/(-ima\.xhtml)|(\.xhtml)|(-ima\.html)|(\.html)/)[0] === location.value.href.split(/(-ima\.xhtml)|(\.xhtml)|(-ima\.html)|(\.html)/)[0]
+                  })
+                  currentChapter.value = newLocation ? newLocation.label : ''
                   readPercent.value = (book.locations.percentageFromCfi(location.value.cfi) * 100).toFixed(2)
                 })
                 location.value = rendition.currentLocation().start

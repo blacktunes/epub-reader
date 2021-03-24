@@ -1,33 +1,26 @@
 <template>
-  <div class="shelf">
-    <template v-for="item in BooksList" :key="item.name">
+  <Transition name="fade" appear>
+    <div class="shelf">
       <Card>
         <template v-slot:header>
-          <div class="shelf-title">{{ item.name }} - {{ item.author }}</div>
+          <div class="shelf-title">咸鱼轻小说</div>
         </template>
         <div class="book-list">
-          <template v-for="book in item.list" :key="book.name">
+          <template v-for="item in BooksList" :key="item.name">
             <div class="book">
-              <router-link :to="`/reader?book=${item.name}&name=${book.path}`">
+              <router-link :to="`/book?c=${item.name}`">
                 <Card>
-                  <template v-slot:header>
-                    <div class="book-title">
-                      {{ book.name }}
-                    </div>
-                  </template>
-                  <img
-                    class="img"
-                    src="../assets/image/loading.png"
-                    v-lazy="getUrl(item.name, book.path)"
-                  />
+                  <div class="book-title">
+                    {{ item.name }} - {{ item.author }} [{{ item.list.length }}]
+                  </div>
                 </Card>
               </router-link>
             </div>
           </template>
         </div>
       </Card>
-    </template>
-  </div>
+    </div>
+  </Transition>
 </template>
 
 <script>
@@ -38,7 +31,7 @@ export default {
   components: {
     Card
   },
-  setup () {
+  setup() {
     const getUrl = (name, path) => {
       return process.env.NODE_ENV === 'production'
         ? `https://cdn.jsdelivr.net/gh/blacktunes/epub-reader@master/public/book/${name}/${path}.jpg`
@@ -61,21 +54,20 @@ a
   padding 5px
 
   .shelf-title
+    font-size 18px
+    font-weight bold
     text-align center
     padding 10px 5px
 
   .book-list
     display flex
+    flex-direction column
     flex-wrap wrap
-    justify-content space-between
 
     .book
-      flex 0 0 50%
+      flex 1
 
       .book-title
-        font-size 12px
+        font-size 14px
         text-align center
-
-      .img
-        width 100%
 </style>
