@@ -20,7 +20,7 @@ export default {
     provide('loading', loading)
 
     const book = Epub(process.env.NODE_ENV === 'production'
-      ? `https://cdn.jsdelivr.net/gh/blacktunes/epub-reader@master/public/book/${route.query.c}/${route.query.n}.epub`
+      ? `https://fastly.jsdelivr.net/gh/blacktunes/epub-reader@master/public/book/${route.query.c}/${route.query.n}.epub`
       : `/book/${route.query.c}/${route.query.n}.epub`)
     const rendition = book.renderTo('book', {
       flow: 'paginated',

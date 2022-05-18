@@ -23,7 +23,7 @@ export default {
 
     const getUrl = (name, path) => {
       return process.env.NODE_ENV === 'production'
-        ? `https://cdn.jsdelivr.net/gh/blacktunes/epub-reader@master/public/book/${name}/${path}.jpg`
+        ? `https://fastly.jsdelivr.net/gh/blacktunes/epub-reader@master/public/book/${name}/${path}.jpg`
         : `/book/${name}/${path}.jpg`
     }
 
